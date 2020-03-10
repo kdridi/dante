@@ -9,3 +9,4 @@ script:
 before_install:
 - openssl aes-256-cbc -K $encrypted_8e87cdac726a_key -iv $encrypted_8e87cdac726a_iv
   -in data.tbz2.enc -out data.tbz2 -d
+- docker pull epitechcontent/epitest-docker
