@@ -13,12 +13,15 @@ const main = async (api) => {
 		const { url, wdir, tdir } = request
 
 		{
+			console.error('git clone', tdir)
 			await execa('git', ['clone', tdir, path.resolve(wdir, 'tests')])
+			console.error('make -C', path.resolve(wdir, 'tests'))
 			await execa('docker', ['container', 'run', '--rm', '--network', 'none', '-v', `${wdir}:/app`, '-w', '/app', 'epitechcontent/epitest-docker', 'bash', '-c', 'make -C tests'])
 		}
 
 		let clone = null
 		{
+			console.error('git clone', url)
 			try {
 				clone = await execa('git', ['clone', url, path.resolve(wdir, 'delivery')])
 			} catch (error) {
@@ -28,6 +31,7 @@ const main = async (api) => {
 
 		let build = null
 		{
+			console.error('make -C', path.resolve(wdir, 'delivery'))
 			try {
 				build = await execa('docker', ['container', 'run', '--rm', '--network', 'none', '-v', `${wdir}:/app`, '-w', '/app', 'epitechcontent/epitest-docker', 'bash', '-c', 'make -C delivery'])
 			} catch (error) {
