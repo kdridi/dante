@@ -2,7 +2,8 @@ const API = require('./data/api')
 
 const main = async (api) => {
 	const { students, slug, workdir } = api
-	return JSON.stringify({ students, slug, workdir }, null, 2)
+	const repositoryList = students.map((student) => api.getRepository(student))
+	return JSON.stringify({ students, slug, workdir, repositoryList }, null, 2)
 }
 
 main(new API('dante')).then(
