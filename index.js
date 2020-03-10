@@ -6,6 +6,7 @@ const main = async (api) => {
 	const requests = await api.getRepositoryList()
 	const responses = await Promise.all(
 		requests.map(async (request) => {
+			console.error(request)
 			const { url, wdir, tdir } = request
 
 			{
@@ -31,7 +32,10 @@ const main = async (api) => {
 				}
 			}
 
-			return Object.assign(request, { steps: { clone, build } })
+			const steps = { clone, build }
+			console.error(request, steps)
+
+			return Object.assign(request, { steps })
 		})
 	)
 	return JSON.stringify(responses, null, 2)
