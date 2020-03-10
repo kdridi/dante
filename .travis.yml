@@ -1,0 +1,4 @@
+language: node
+
+script:
+- echo ${PRIVATE_JSON} | base64 -d
