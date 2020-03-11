@@ -1,14 +1,14 @@
-const ProgressBar = require('progress')
 const API = require('./data/api')
 
 const main = async (api) => {
 	const requests = await api.getRepositoryList()
 	console.log(requests)
 
-	const bar = new ProgressBar('downloading [:bar] :percent :etas :current/:total  ', { total: requests.length })
-
 	const responses = []
-	requests.forEach(async (request) => {
+	for (let requestIndex = 0; requestIndex < requests.length; requestIndex++) {
+		const request = requests[requestIndex]
+		console.log('>>>> request : ', request)
+
 		const { wdir, deliveryURL, testsURL, artifacts } = request
 
 		const tests = { clone: null, make: null }
@@ -20,7 +20,9 @@ const main = async (api) => {
 		delivery.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
 
 		const deploy = {}
-		artifacts.forEach(async (artifact) => {
+		for (let artifactIndex = 0; artifactIndex < artifacts.length; artifactIndex++) {
+			const artifact = artifacts[artifactIndex]
+
 			const dirname = artifact.split('/')
 			const basename = dirname.pop()
 
@@ -32,13 +34,18 @@ const main = async (api) => {
 			data.copy = await api.dockerRun(wdir, 'cp', fpath, tpath)
 
 			deploy[artifact] = data
-		})
+		}
 
-		const steps = { tests, delivery, deploy }
-		bar.tick()
-
-		responses.push(Object.assign(request, { steps }))
-	})
+		responses.push(
+			Object.assign(request, {
+				steps: {
+					tests,
+					delivery,
+					deploy,
+				},
+			})
+		)
+	}
 
 	return JSON.stringify(responses, null, 2)
 }
