@@ -6,6 +6,8 @@ const main = async (api) => {
 	const requests = await api.getRepositoryList()
 	console.log(requests)
 
+	const startTime = new Date()
+
 	const responses = []
 	for (let requestIndex = 0; requestIndex < requests.length; requestIndex++) {
 		const request = requests[requestIndex]
@@ -49,7 +51,7 @@ const main = async (api) => {
 			.map((skill) => Object.assign(skill, { timeout: parseInt(skill.timeout.split('s').shift()) }))
 
 		const runTests = []
-		for (let testIndex = 0; testIndex < 5 && testIndex < tests.length; testIndex++) {
+		for (let testIndex = 0; testIndex < tests.length; testIndex++) {
 			const test = tests[testIndex]
 			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `, test)
 
@@ -71,9 +73,13 @@ const main = async (api) => {
 		)
 	}
 
-	await api.mail(responses)
+	const stopTime = new Date()
 
-	return JSON.stringify(responses, null, 2)
+	const result = { startTime, stopTime, results: responses }
+
+	await api.mail(result)
+
+	return JSON.stringify(result, null, 2)
 }
 
 main(new API('dante')).then(
