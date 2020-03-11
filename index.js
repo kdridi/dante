@@ -11,15 +11,15 @@ const main = async (api) => {
 		requests.map(async (request) => {
 			const { wdir, deliveryURL, testsURL } = request
 
-			{
-				api.gitClone(wdir, testsURL, 'tests')
-				api.dockerRun(wdir, 'make', '-C', 'tests')
-			}
+			const tests = { clone: null, make: null }
+			tests.clone = await api.gitClone(wdir, testsURL, 'tests')
+			tests.make = await api.dockerRun(wdir, 'make', '-C', 'tests')
 
-			const clone = api.gitClone(wdir, deliveryURL, 'delivery')
-			const build = api.dockerRun(wdir, 'make', '-C', 'delivery')
+			const delivery = { clone: null, make: null }
+			delivery.clone = await api.gitClone(wdir, deliveryURL, 'delivery')
+			delivery.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
 
-			const steps = { clone, build }
+			const steps = { tests, delivery }
 			bar.tick()
 
 			return Object.assign(request, { steps })
