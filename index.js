@@ -1,3 +1,5 @@
+const fs = require('fs')
+const path = require('path')
 const API = require('./data/api')
 
 const main = async (api) => {
@@ -11,15 +13,15 @@ const main = async (api) => {
 
 		const { wdir, deliveryURL, testsURL, artifacts } = request
 
-		const tests = { clone: null, make: null }
-		tests.clone = await api.gitClone(wdir, testsURL, 'tests')
-		tests.make = await api.dockerRun(wdir, 'make', '-C', 'tests')
+		const prepareTestsDirectory = { clone: null, make: null }
+		prepareTestsDirectory.clone = await api.gitClone(wdir, testsURL, 'tests')
+		prepareTestsDirectory.make = await api.dockerRun(wdir, 'make', '-C', 'tests')
 
-		const delivery = { clone: null, make: null }
-		delivery.clone = await api.gitClone(wdir, deliveryURL, 'delivery')
-		delivery.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
+		const prepareDeliveryDirectory = { clone: null, make: null }
+		prepareDeliveryDirectory.clone = await api.gitClone(wdir, deliveryURL, 'delivery')
+		prepareDeliveryDirectory.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
 
-		const deploy = {}
+		const deployArtifacts = {}
 		for (let artifactIndex = 0; artifactIndex < artifacts.length; artifactIndex++) {
 			const artifact = artifacts[artifactIndex]
 
@@ -33,15 +35,37 @@ const main = async (api) => {
 			data.mkdir = await api.dockerRun(wdir, 'mkdir', '-p', tpath)
 			data.copy = await api.dockerRun(wdir, 'cp', fpath, tpath)
 
-			deploy[artifact] = data
+			deployArtifacts[artifact] = data
+		}
+
+		const tests = Array.prototype.concat
+			.apply(
+				[],
+				Object.entries(JSON.parse(fs.readFileSync(path.resolve(wdir, 'tests', 'manifest.json'))).skills).map(([category, { output }]) => {
+					return output.map((skill) => Object.assign(skill, { category }))
+				})
+			)
+			.map((skill) => Object.assign({ timeout: '30s' }, skill))
+			.map((skill) => Object.assign(skill, { timeout: parseInt(skill.timeout.split('s').shift()) }))
+
+		const runTests = []
+		for (let testIndex = 0; testIndex < tests.length; testIndex++) {
+			const test = tests[testIndex]
+			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `, test)
+
+			const { timeout, cmd } = test
+			const result = await api.dockerRun(path.resolve(wdir, 'tests'), 'timeout', timeout, 'bash', '-c', cmd)
+
+			runTests.push({ test, result })
 		}
 
 		responses.push(
 			Object.assign(request, {
 				steps: {
-					tests,
-					delivery,
-					deploy,
+					prepareTestsDirectory,
+					prepareDeliveryDirectory,
+					deployArtifacts,
+					runTests,
 				},
 			})
 		)
