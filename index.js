@@ -7,7 +7,7 @@ const main = async (api) => {
 	const responses = []
 	for (let requestIndex = 0; requestIndex < requests.length; requestIndex++) {
 		const request = requests[requestIndex]
-		console.log('>>>> request : ', request)
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}] : `, request)
 
 		const { wdir, deliveryURL, testsURL, artifacts } = request
 
