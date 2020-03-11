@@ -19,6 +19,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "execa": "^4.0.0",
+    "nodejs-nodemailer-outlook": "^1.2.3",
     "progress": "^2.0.3"
   }
 }
