@@ -49,7 +49,7 @@ const main = async (api) => {
 			.map((skill) => Object.assign(skill, { timeout: parseInt(skill.timeout.split('s').shift()) }))
 
 		const runTests = []
-		for (let testIndex = 0; testIndex < tests.length; testIndex++) {
+		for (let testIndex = 0; testIndex < 5 && testIndex < tests.length; testIndex++) {
 			const test = tests[testIndex]
 			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `, test)
 
@@ -70,6 +70,8 @@ const main = async (api) => {
 			})
 		)
 	}
+
+	await api.mail(responses)
 
 	return JSON.stringify(responses, null, 2)
 }
