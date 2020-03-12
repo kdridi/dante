@@ -4,14 +4,13 @@ const API = require('./data/api')
 
 const main = async (api) => {
 	const requests = await api.getRepositoryList()
-	console.log(requests)
 
 	const startTime = new Date()
 
 	const responses = []
 	for (let requestIndex = 0; requestIndex < requests.length; requestIndex++) {
 		const request = requests[requestIndex]
-		console.log(`>>>> request[${requestIndex + 1}/${requests.length}] : `, request)
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]`)
 
 		const { wdir, deliveryURL, testsURL, artifacts } = request
 
@@ -53,7 +52,7 @@ const main = async (api) => {
 		const runTests = []
 		for (let testIndex = 0; testIndex < tests.length; testIndex++) {
 			const test = tests[testIndex]
-			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `, test)
+			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `)
 
 			const { timeout, cmd } = test
 			const result = await api.dockerRun(path.resolve(wdir, 'tests'), 'timeout', timeout, 'bash', '-c', cmd)
@@ -79,7 +78,7 @@ const main = async (api) => {
 
 	await api.mail(result)
 
-	return JSON.stringify(result, null, 2)
+	return JSON.stringify('SUCCESS', null, 2)
 }
 
 main(new API('dante')).then(
