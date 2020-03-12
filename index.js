@@ -60,9 +60,12 @@ const main = async (api) => {
 			runTests.push({ test, result })
 		}
 
+		const gitLogs = await api.gitLogs(path.resolve(wdir, 'delivery'))
+
 		responses.push(
 			Object.assign(request, {
 				steps: {
+					gitLogs,
 					prepareTestsDirectory,
 					prepareDeliveryDirectory,
 					deployArtifacts,
