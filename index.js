@@ -15,16 +15,19 @@ const main = async (api) => {
 		const { wdir, deliveryURL, testsURL, artifacts } = request
 
 		const prepareTestsDirectory = { clone: null, make: null }
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, 'prepareTestsDirectory')
 		prepareTestsDirectory.clone = await api.gitClone(wdir, testsURL, 'tests')
 		prepareTestsDirectory.make = await api.dockerRun(wdir, 'make', '-C', 'tests')
 
 		const prepareDeliveryDirectory = { clone: null, make: null }
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, 'prepareDeliveryDirectory')
 		prepareDeliveryDirectory.clone = await api.gitClone(wdir, deliveryURL, 'delivery')
 		prepareDeliveryDirectory.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
 
 		const deployArtifacts = {}
 		for (let artifactIndex = 0; artifactIndex < artifacts.length; artifactIndex++) {
 			const artifact = artifacts[artifactIndex]
+			console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, `deployArtifacts[${artifactIndex + 1}/${artifacts.length}]`)
 
 			const dirname = artifact.split('/')
 			const basename = dirname.pop()
@@ -50,6 +53,7 @@ const main = async (api) => {
 			.map((skill) => Object.assign(skill, { timeout: parseInt(skill.timeout.split('s').shift()) }))
 
 		const runTests = []
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, 'runTests')
 		for (let testIndex = 0; testIndex < tests.length; testIndex++) {
 			const test = tests[testIndex]
 			console.log(`>>>> test[${testIndex + 1}/${tests.length}] : `)
@@ -61,6 +65,7 @@ const main = async (api) => {
 		}
 
 		const gitLogs = await api.gitLogs(path.resolve(wdir, 'delivery'))
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, 'gitLogs')
 
 		responses.push(
 			Object.assign(request, {
