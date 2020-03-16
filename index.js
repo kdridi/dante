@@ -24,6 +24,9 @@ const main = async (api) => {
 		prepareDeliveryDirectory.clone = await api.gitClone(wdir, deliveryURL, 'delivery')
 		prepareDeliveryDirectory.make = await api.dockerRun(wdir, 'make', '-C', 'delivery')
 
+		const countLinesOfCode = await api.cloc(wdir, 'delivery')
+		console.log(`>>>> request[${requestIndex + 1}/${requests.length}]: `, 'countLinesOfCode')
+
 		const deployArtifacts = {}
 		for (let artifactIndex = 0; artifactIndex < artifacts.length; artifactIndex++) {
 			const artifact = artifacts[artifactIndex]
@@ -70,6 +73,7 @@ const main = async (api) => {
 		responses.push(
 			Object.assign(request, {
 				steps: {
+					countLinesOfCode,
 					gitLogs,
 					prepareTestsDirectory,
 					prepareDeliveryDirectory,
